@@ -5,7 +5,18 @@ import asyncio, random,os
 from werkzeug.utils import secure_filename
 from bin import *
 from swibots import BotApp
+from typing import Callable
 
+class UploadProgress:
+    def __init__(self, percent_complete: float):
+        self.percent_complete = percent_complete
+
+async def upload_progress_handler(progress: UploadProgress) -> None:
+    print(f"Upload progress: {format_file_size(progress.current)}")
+
+def upload_file(callback: Callable[[UploadProgress], 'Coroutine[Any, Any, None]']):
+    for i in range(101):
+        callback(UploadProgress(i))
 
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAyMDUsImlzX2JvdCI6dHJ1ZSwiYWN0aXZlIjp0cnVlLCJpYXQiOjE3MTM2MTQxOTgsImV4cCI6MjM0NDc2NjE5OH0.-SHFOkXWreqsjTjcM5V7GLaTZwfW62DGlzeGoYuQSnY"
 
@@ -21,7 +32,8 @@ async def switch_upload(file,caption):
                        user_id=10204,
                        document=file,
                        description=caption,
-                       thumb=file)
+                       thumb=file,
+                       progress=upload_progress_handler)
   return res
 
 
@@ -109,38 +121,44 @@ def logout():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
-        file = request.files['file']
-        file_name = secure_filename(file.filename)
-        file.save(os.path.join("uploads", file_name))
-        caption = request.form.get('caption', '')
-        message = bot._loop.run_until_complete(switch_upload(os.path.join("uploads", file_name),caption))
+            remote_url = request.form.get('remote_url', '')
+            caption = request.form.get('caption', '')
+            if len(remote_url) > 1 :
+                file_name = os.path.basename(remote_url)
+
+                os.system(f"wget -nc {remote_url} -P uploads/")
+            else:
+                file = request.files['file']
+                file_name = secure_filename(file.filename)
+                file.save(os.path.join("uploads", file_name))
 
 
+            return redirect(url_for('home'))
+            message = asyncio.run(switch_upload(os.path.join("uploads", file_name),caption))
+            entry_data = {
+                            'username': session['username'],  
+                            'file_id': message.id,
+                            'media_id':message.media_info.id,
+                            'media_link': message.media_link,
+                            'uploaded_date':message.sent_date.split()[0],
+                            'checksum':message.media_info.checksum,
+                            'filename': file_name,
+                            'file_size': message.media_info.file_size,
+                            'caption': caption,
+                        }
 
-        entry_data = {
-            'username': session['username'],  
-            'file_id': message.id,
-            'media_id':message.media_info.id,
-            'media_link': message.media_link,
-            'uploaded_date':message.sent_date.split()[0],
-            'checksum':message.media_info.checksum,
-            'filename': file_name,
-            'file_size': message.media_info.file_size,
-            'caption': caption,
-        }
-
-        write_to_binary(entry_data)
-
-        return redirect(url_for('home'))
+            write_to_binary(entry_data)
+            return redirect(url_for('home'))
     except Exception as e: 
-        return f"Error: {str(e)}"
+                return f"Error: {str(e)}"
 
 
 
 
 
-
-
+@app.route('/delete/<id>')
+def delete_file(id):
+   pass
 
 
 @app.route('/download/<id>')
@@ -149,7 +167,7 @@ def download_file(id):
     if entry:
         file_name = f'''{entry["filename"]}'''
         media_link = f'{entry["media_link"]}' 
-        return redirect(media_link, code=302, Response = f'<a href="{media_link}" download="{file_name}">Download {file_name}</a>')
+        return redirect(media_link, code=302, Response = f'<a href="{media_link}"download="{file_name}">Download {file_name}</a>')
 
 
 if __name__ == '__main__':

@@ -89,7 +89,9 @@
         <form action="/upload" method="post" enctype="multipart/form-data">
             <h1>Upload Your File</h1>
             <center><label for="file">Choose a file:</label><center>
-            <center><input type="file" id="file" name="file" accept=".txt, .pdf, .jpg, .jpeg, .png"><center>
+            <input type="file" id="file" name="file" accept=".txt, .pdf, .jpg, .jpeg, .png">
+            <label for="caption">Remote Url:</label>
+            <input type="text" id="remote_url" name="remote_url">
             <label for="caption">Caption:</label>
             <input type="text" id="caption" name="caption">
             <button type="submit">Upload</button>
@@ -104,12 +106,13 @@
         <div class="file-entry">
             <p>Filename: {{ entry.filename }}</p>
             <p>File Size: {{  entry.formatted_file_size}}</p>
-           <p>Uploaded Time: {{  entry.uploaded_time}} {{  entry.uploaded_date}}</p>
+           <p>Uploaded Time: {{  entry.uploaded_time}} {{ entry.uploaded_date}}</p>
 
             {% if entry.caption is not none and entry.caption != "" %}
             <p>Caption: {{ entry.caption }}</p>
             {% endif %}
-            <p><a href="{{ entry.media_link }}" download="{{ entry.filename }}">Download</a></p>
+            <p><a href="{{ entry.media_link }}"download="{{ entry.filename }}">Download</a></p>
+            <p><a href="/delete/{{ entry.id }}">Delete</a></p>
         </div>
         {% endfor %}
     </div>
