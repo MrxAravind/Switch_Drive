@@ -10,7 +10,6 @@ from pyrogram import Client
 
 api_id = 3702208
 api_hash = "3ee1acb7c7622166cf06bb38a19698a9"
-USER_SESSION_STRING = "BQGdIyYAHab7Xa5mMN5EDTQmZ6NwYPvKlko2c2GBj4q7geQveZqnhkZLIFI_x98ACeNGtaBybNP7JtnwG5sZwHLBxK_OK8VRMHl-mHvzCdLpiUrXG-rzBKqpkNcPGlIW4lykdwiUgEGeh0P5HuqXSF4lLzgGOX4C1E5Ihbv5vA0KspQmghGipLXvln3yL2JoNUt7S5ZvI_NngSDiwQLqCKQ6c8Nc3AJbQ7KsM7XdscvR03oB3tLXemHFRPcogc3Yozq1qljEOtbi9bhGQS4Ikf8rwMx1o-p0L4YP6_a9Hzk1imhECNssezQawIbuS6_4PqHOOXYfsuCuESxKNFDxjwPq8xaQ7AAAAAGdNRliAA"
 
 
 tg = Client("Spidy", api_id, api_hash,session_string=USER_SESSION_STRING)
