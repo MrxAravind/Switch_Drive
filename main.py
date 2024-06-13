@@ -135,7 +135,7 @@ def download_file(id):
         return redirect(media_link, code=302, Response=f'<a href="{media_link}"download="{file_name}">Download {file_name}</a>')
 
 def run_flask():
-    app.run(host='0.0.0.0',port=8080)
+    app.run(host='0.0.0.0',port=80)
 
 if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask)
